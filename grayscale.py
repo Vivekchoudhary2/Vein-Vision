@@ -1,0 +1,36 @@
+import cv2
+from picamera2 import Picamera2
+import time
+
+print(cv2.__version__)
+
+cam = Picamera2()
+cam.preview_configuration.main.size = (640, 480)
+cam.preview_configuration.main.format = "RGB888"
+cam.preview_configuration.align()
+cam.configure("preview")
+cam.start()
+
+tLast = time.time()
+time.sleep(0.1)
+
+while True:
+    dT = time.time() - tLast
+    fps = int(1 / dT)
+    tLast = time.time()
+
+    frame = cam.capture_array()
+
+    # Convert to grayscale
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+
+    # Display FPS on grayscale image
+    cv2.putText(gray_frame, (str(fps) + ' FPS'), (40, 80),
+                cv2.FONT_HERSHEY_COMPLEX, 1, (255), 1)
+
+    cv2.imshow('Grayscale WebCam', gray_frame)
+
+    if cv2.waitKey(1) & 0xff == ord('q'):
+        break
+
+cv2.destroyAllWindows()
